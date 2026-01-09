@@ -1,0 +1,1 @@
+C:\Dev\Antigravity\AeroTools\AeroToolsUNLP\Components\Auth\RequireAuth.razor(3,40): error CS0234: El tipo o el nombre del espacio de nombres 'Authorization' no existe en el espacio de nombres 'Microsoft.AspNetCore.Components' (¿falta alguna referencia de ensamblado?) [C:\Dev\Antigravity\AeroTools\AeroToolsUNLP\AeroToolsUNLP.csproj]

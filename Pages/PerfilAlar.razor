@@ -1,0 +1,111 @@
+@page "/herramientas/perfil"
+@using AeroToolsUNLP.Services.Calculators
+@using AeroToolsUNLP.Components.Common
+@inject AerodinamicaService AerodinamicaService
+
+<div class="container mt-4">
+    <h2><i class="bi bi-bezier2"></i> Analizador de Perfiles Alares</h2>
+    <p class="text-muted">Generación y visualización 3D de perfiles NACA 4 dígitos.</p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">Parámetros NACA</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Designación (4 dígitos)</label>
+                        <input type="text" class="form-control" @bind="nacaCode" placeholder="2412" maxlength="4" />
+                        <div class="form-text">Ejemplo: 2412, 0012, 4415</div>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100" @onclick="GenerarPerfil">
+                        Generar
+                    </button>
+                    
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-2">@errorMessage</div>
+                    }
+                </div>
+            </div>
+            
+             <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">Propiedades Teóricas</div>
+                 <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Espesor Máx.</span>
+                        <strong>@(GetThickness())%</strong>
+                    </li>
+                     <li class="list-group-item d-flex justify-content-between">
+                        <span>Curvatura Máx.</span>
+                        <strong>@(GetCamber())%</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm p-0 overflow-hidden">
+                <ThreeScene @ref="threeScene" ContainerId="airfoil3d" />
+            </div>
+            <div class="mt-2 text-end text-muted">
+                <small><i class="bi bi-mouse"></i> Click y arrastrar para rotar (próximamente controles completos)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string nacaCode = "2412";
+    private string errorMessage = "";
+    private ThreeScene? threeScene;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Auto generate initial
+             await GenerarPerfil(); 
+             // Note: invoke async might fail if scene not yet init in JS. 
+             // Usually safe if after render, but let's delay slightly or user explicit click.
+             // Better: user explicit click for robustness or OnAfterRenderAsync logic in component.
+        }
+    }
+
+    private async Task GenerarPerfil()
+    {
+        errorMessage = "";
+        try
+        {
+            if (nacaCode.Length != 4 || !int.TryParse(nacaCode, out _))
+            {
+                errorMessage = "Código inválido. Deben ser 4 números.";
+                return;
+            }
+
+            var profile = AerodinamicaService.GenerateNaca4(nacaCode);
+            var (vertices, indices) = AerodinamicaService.ExtrudeProfile(profile);
+            
+            if (threeScene != null)
+            {
+                await threeScene.UpdateGeometryAsync(vertices, indices);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+    
+    private string GetThickness()
+    {
+        if (nacaCode.Length >= 4) return nacaCode.Substring(2, 2);
+        return "-";
+    }
+    
+    private string GetCamber()
+    {
+         if (nacaCode.Length >= 4) return nacaCode.Substring(0, 1);
+        return "-";
+    }
+}

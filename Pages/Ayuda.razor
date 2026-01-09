@@ -1,0 +1,56 @@
+@page "/ayuda"
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Ayuda y Documentación</h1>
+            <p class="lead">Bienvenido a AeroTools UNLP, la plataforma de herramientas para ingeniería aeroespacial.</p>
+            
+            <hr />
+
+            <h3><i class="bi bi-info-circle"></i> Acerca de la plataforma</h3>
+            <p>
+                Esta aplicación web progresiva (PWA) permite realizar cálculos y simulaciones offline. 
+                Fue desarrollada como parte del proyecto final de carrera para la Facultad de Ingeniería de la UNLP.
+            </p>
+
+            <h3><i class="bi bi-tools"></i> Herramientas Disponibles</h3>
+            <div class="accordion" id="accordionHelp">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                            Analizador de Atmósfera (Próximamente)
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionHelp">
+                        <div class="accordion-body">
+                            Calcula las propiedades de la atmósfera estándar (ISA) a diferentes altitudes y permite aplicar correcciones de temperatura.
+                        </div>
+                    </div>
+                </div>
+                 <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Generador de Superficies (Próximamente)
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionHelp">
+                        <div class="accordion-body">
+                            Herramienta para generar volúmenes de control y obstáculos en 3D sobre un mapa global utilizando CesiumJS, con capacidad de exportación a KML.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="mt-4"><i class="bi bi-question-circle"></i> Preguntas Frecuentes</h3>
+            <ul>
+                <li><strong>¿Necesito internet?</strong> Solo para la primera carga y para sincronizar datos. Las herramientas funcionan offline.</li>
+                <li><strong>¿Mis datos están seguros?</strong> Los cálculos se guardan localmente en tu dispositivo y se sincronizan con la base de datos cuando tienes conexión.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+
+}

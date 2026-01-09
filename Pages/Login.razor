@@ -1,0 +1,134 @@
+@page "/login"
+@using AeroToolsUNLP.Models.Core
+@using AeroToolsUNLP.Services.Auth
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <h2 class="text-primary mb-1">AeroTools UNLP</h2>
+                    <p class="text-muted">Plataforma de Herramientas Aeroespaciales</p>
+                </div>
+
+                <ul class="nav nav-tabs nav-fill mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @(activeTab == "login" ? "active" : "")" @onclick="@(() => activeTab = "login")">Iniciar Sesión</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @(activeTab == "register" ? "active" : "")" @onclick="@(() => activeTab = "register")">Registrarse</button>
+                    </li>
+                </ul>
+
+                @if (activeTab == "login")
+                {
+                    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+                        <div class="form-floating mb-3">
+                            <InputText id="legajo" class="form-control" @bind-Value="loginModel.Legajo" placeholder="Legajo" />
+                            <label for="legajo">Legajo / ID</label>
+                        </div>
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger py-2">@errorMessage</div>
+                        }
+                        <button type="submit" class="btn btn-primary w-100 py-2">Ingresar</button>
+                    </EditForm>
+                }
+                else
+                {
+                    <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="form-floating mb-2">
+                            <InputText id="regLegajo" class="form-control" @bind-Value="registerModel.Legajo" placeholder="Legajo" required />
+                            <label for="regLegajo">Legajo *</label>
+                        </div>
+                        <div class="form-floating mb-2">
+                            <InputText id="regNombre" class="form-control" @bind-Value="registerModel.Nombre" placeholder="Nombre" />
+                            <label for="regNombre">Nombre Completo</label>
+                        </div>
+                         <div class="form-floating mb-2">
+                            <InputSelect id="regTipo" class="form-select" @bind-Value="registerModel.Tipo">
+                                <option value="alumno">Alumno</option>
+                                <option value="docente">Docente</option>
+                                <option value="investigador">Investigador</option>
+                            </InputSelect>
+                            <label for="regTipo">Tipo</label>
+                        </div>
+                         <div class="form-floating mb-2">
+                            <InputText id="regCarrera" class="form-control" @bind-Value="registerModel.Carrera" placeholder="Carrera" />
+                            <label for="regCarrera">Carrera</label>
+                        </div>
+                        
+                         @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger py-2">@errorMessage</div>
+                        }
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Crear Cuenta</button>
+                    </EditForm>
+                }
+            </div>
+        </div>
+        <div class="text-center mt-3">
+             <a href="/" class="text-decoration-none">Continuar como invitado &rarr;</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string activeTab = "login";
+    private LoginModel loginModel = new();
+    private Usuario registerModel = new();
+    private string errorMessage = "";
+
+    private class LoginModel
+    {
+        public string Legajo { get; set; } = "";
+    }
+
+    private async Task HandleLogin()
+    {
+        errorMessage = "";
+        if (string.IsNullOrWhiteSpace(loginModel.Legajo)) 
+        {
+            errorMessage = "Ingrese su legajo";
+            return;
+        }
+
+        var success = await AuthService.IniciarSesion(loginModel.Legajo);
+        if (success)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = "Usuario no encontrado. Por favor regístrese.";
+        }
+    }
+
+    private async Task HandleRegister()
+    {
+        errorMessage = "";
+        if (string.IsNullOrWhiteSpace(registerModel.Legajo))
+        {
+            errorMessage = "El legajo es obligatorio.";
+            return;
+        }
+
+        registerModel.PrimeraVisita = DateTime.Now;
+        registerModel.UltimaActividad = DateTime.Now;
+
+        var success = await AuthService.RegistrarUsuario(registerModel);
+        if (success)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = "Error al registrar. Es posible que el legajo ya exista.";
+        }
+    }
+}

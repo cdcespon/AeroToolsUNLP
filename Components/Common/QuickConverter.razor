@@ -1,0 +1,55 @@
+@using AeroToolsUNLP.Utils
+
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-light py-1">
+        <small class="text-muted"><i class="bi bi-arrow-left-right"></i> Conversor Rápido</small>
+    </div>
+    <div class="card-body p-2">
+        <div class="row g-2 align-items-center">
+            <div class="col-4">
+                <input type="number" class="form-control form-control-sm" @bind="value1" @oninput="OnValue1Changed" placeholder="Val" />
+            </div>
+            <div class="col-3">
+                <select class="form-select form-select-sm" @bind="unit1">
+                    <option value="m">m</option>
+                    <option value="ft">ft</option>
+                    <option value="km">km</option>
+                    <option value="nm">NM</option>
+                </select>
+            </div>
+            <div class="col-1 text-center">=</div>
+            <div class="col-4">
+               <input type="number" class="form-control form-control-sm" value="@value2" disabled />
+            </div>
+             <!-- In a full version, we'd have a second select and better logic -->
+        </div>
+        <div class="mt-1 text-end">
+            <small class="text-muted" style="font-size: 0.7rem;">(Solo m &lrarr; ft demo)</small>
+        </div>
+    </div>
+</div>
+
+@code {
+    private double value1;
+    private double value2;
+    private string unit1 = "m";
+
+    private void OnValue1Changed(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var val))
+        {
+            value1 = val;
+            Calculate();
+        }
+    }
+
+    private void Calculate()
+    {
+        if (unit1 == "m") value2 = UnitConverter.MetersToFeet(value1);
+        else if (unit1 == "ft") value2 = UnitConverter.FeetToMeters(value1);
+        else value2 = value1;
+    }
+    
+    // This is a simplified demo component.
+    // The real one should allow selecting both From and To units.
+}

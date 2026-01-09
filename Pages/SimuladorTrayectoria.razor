@@ -1,0 +1,136 @@
+@page "/herramientas/trayectoria"
+@using AeroToolsUNLP.Services.Calculators
+@using AeroToolsUNLP.Components.Common
+@using System.Text.Json
+@inject TrayectoriaService TrayectoriaService
+
+<div class="container-fluid mt-3">
+    <div class="row">
+         <!-- Sidebar Controls -->
+        <div class="col-md-3">
+             <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white"><i class="bi bi-send"></i> Simulador Balístico</div>
+                <div class="card-body scrollable-panel">
+                    <h6 class="text-muted">Condiciones Iniciales</h6>
+                    <NumericInput Label="Velocidad (m/s)" @bind-Value="velocity" Step="10" Placeholder="100" />
+                    <NumericInput Label="Ángulo (°)" @bind-Value="angle" Step="5" Placeholder="45" />
+                    <NumericInput Label="Altura Inicial (m)" @bind-Value="height" Step="100" />
+                    <NumericInput Label="Masa (kg)" @bind-Value="mass" Step="10" Placeholder="500" />
+                    
+                    <hr />
+                    <h6 class="text-muted">Ubicación de Lanzamiento</h6>
+                    <NumericInput Label="Latitud" @bind-Value="lat" Step="0.01" Placeholder="-34.9" />
+                    <NumericInput Label="Longitud" @bind-Value="lon" Step="0.01" Placeholder="-57.9" />
+                    <NumericInput Label="Rumbo/Azimuth (°)" @bind-Value="bearing" Step="5" Placeholder="90" />
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-primary" @onclick="Simular">
+                            <i class="bi bi-play-fill"></i> Simular
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="Limpiar">
+                            <i class="bi bi-trash"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+                 <div class="card-footer">
+                     @if (lastResult != null)
+                     {
+                         <small>
+                             Tiempo Vuelo: @lastResult.Last().Time.ToString("F1") s <br/>
+                             Distancia (X local): @lastResult.Last().X.ToString("F1") m <br/>
+                             Apogeo: @lastResult.Max(s => s.Z).ToString("F1") m
+                         </small>
+                     }
+                </div>
+            </div>
+        </div>
+
+        <!-- Cesium Viewer -->
+        <div class="col-md-9">
+            <CesiumViewer @ref="cesiumViewer" ContainerId="trajCesiumView" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private CesiumViewer? cesiumViewer;
+    
+    // Params
+    private double velocity = 250;
+    private double angle = 45;
+    private double height = 0;
+    private double mass = 1000;
+    
+    private double lat = -34.97;
+    private double lon = -57.89;
+    private double bearing = 90; // East
+    
+    private List<SimulationState>? lastResult;
+
+    private async Task Simular()
+    {
+        if (cesiumViewer == null) return;
+        
+        await cesiumViewer.ClearEntitiesAsync();
+        
+        var parameters = new SimulationParameters
+        {
+            InitialVelocity = velocity,
+            InitialAngle = angle,
+            InitialHeight = height,
+            Mass = mass
+        };
+        
+        lastResult = TrayectoriaService.SimulateTrajectory(parameters);
+        
+        // Convert local trajectory (X, Z vertical) to Cartographic path
+        // X in simulation is downrange distance.
+        // We need to map this X distance along the bearing from start lat/lon.
+        // Z is altitude.
+        
+        var positions = new List<double>();
+        
+        foreach(var state in lastResult)
+        {
+            // Simple flat earth approx for short ranges or use Haversine destination point
+            // For visual demo, let's use approx:
+            // 1 deg lat ~ 111111 m
+            // 1 deg lon ~ 111111 * cos(lat) m
+            
+            double dist = state.X;
+            double bearingRad = bearing * Math.PI / 180.0;
+            
+            double dLat = (dist * Math.Cos(bearingRad)) / 111111.0;
+            double dLon = (dist * Math.Sin(bearingRad)) / (111111.0 * Math.Cos(lat * Math.PI / 180.0));
+            
+            positions.Add(lon + dLon);
+            positions.Add(lat + dLat);
+            positions.Add(state.Z);
+        }
+        
+        // Draw Polyline
+        var lineEntity = new 
+        {
+            polyline = new 
+            {
+               positions = new { cartographicDegrees = positions.ToArray() },
+               width = 5,
+               material = "yellow"
+            } 
+        };
+        
+        await cesiumViewer.AddEntityAsync(JsonSerializer.Serialize(lineEntity));
+        
+        // Draw start/end points
+        // Simplified..
+    }
+
+    private async Task Limpiar()
+    {
+        if (cesiumViewer != null)
+        {
+            await cesiumViewer.ClearEntitiesAsync();
+            lastResult = null;
+        }
+    }
+}

@@ -1,0 +1,137 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net9.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = AeroToolsUNLP
+build_property.RootNamespace = AeroToolsUNLP
+build_property.ProjectDir = C:\Dev\Antigravity\AeroTools\AeroToolsUNLP\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Dev\Antigravity\AeroTools\AeroToolsUNLP
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Auth/RequireAuth.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xBdXRoXFJlcXVpcmVBdXRoLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Charts/LineChart.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDaGFydHNcTGluZUNoYXJ0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Charts/PolarChart.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDaGFydHNcUG9sYXJDaGFydC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Common/CesiumViewer.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb21tb25cQ2VzaXVtVmlld2VyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Common/DataGrid.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb21tb25cRGF0YUdyaWQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Common/Loading.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb21tb25cTG9hZGluZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Common/Modal.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb21tb25cTW9kYWwucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Common/NumericInput.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb21tb25cTnVtZXJpY0lucHV0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Common/QuickConverter.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb21tb25cUXVpY2tDb252ZXJ0ZXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Common/ThreeScene.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb21tb25cVGhyZWVTY2VuZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Layout/Footer.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcRm9vdGVyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/AnalizadorAtmosfera.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQW5hbGl6YWRvckF0bW9zZmVyYS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/Ayuda.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXl1ZGEucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/CalculadoraVuelo.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2FsY3VsYWRvcmFWdWVsby5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/Counter.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ291bnRlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/GeneradorSuperficies.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR2VuZXJhZG9yU3VwZXJmaWNpZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/Perfil.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVyZmlsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/PerfilAlar.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGVyZmlsQWxhci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/RendimientoMotor.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVuZGltaWVudG9Nb3Rvci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/RosaVientos.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUm9zYVZpZW50b3MucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/SimuladorTrayectoria.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2ltdWxhZG9yVHJheWVjdG9yaWEucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Pages/Weather.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcV2VhdGhlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTWFpbkxheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-rp0urfdxol
+
+[C:/Dev/Antigravity/AeroTools/AeroToolsUNLP/Components/Layout/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTmF2TWVudS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-2zs9bhmwdr

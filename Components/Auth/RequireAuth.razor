@@ -1,0 +1,39 @@
+@using AeroToolsUNLP.Services.Auth
+@using AeroToolsUNLP.Models.Core
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+@if (isAuthorized)
+{
+    @Authorized
+}
+else
+{
+    @NotAuthorized
+}
+
+@code {
+    [Parameter] public RenderFragment? Authorized { get; set; }
+    [Parameter] public RenderFragment? NotAuthorized { get; set; }
+
+    private bool isAuthorized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await AuthService.ObtenerUsuarioActual();
+        if (user != null)
+        {
+            isAuthorized = true;
+        }
+        else
+        {
+            // Redirect to login if not authorized? 
+            // Or just show NotAuthorized content which might be a redirect or a message.
+            // For this component, let's just render NotAuthorized.
+            // If strict redirect is needed, we can do it here.
+             Navigation.NavigateTo("/login");
+        }
+    }
+}

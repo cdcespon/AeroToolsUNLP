@@ -1,0 +1,80 @@
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-primary box-shadow mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">AeroTools UNLP</a>
+        <button class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="@NavMenuCssClass navbar-collapse" @onclick="ToggleNavMenu">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                     <NavLink class="nav-link" href="herramientas">
+                        <span class="bi bi-tools" aria-hidden="true"></span> Herramientas
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                     <NavLink class="nav-link" href="herramientas/atmosfera">
+                        <span class="bi bi-cloud-haze2" aria-hidden="true"></span> Atmósfera
+                    </NavLink>
+                </li>
+                 <li class="nav-item">
+                     <NavLink class="nav-link" href="herramientas/superficies">
+                        <span class="bi bi-box" aria-hidden="true"></span> Sup. y Obst.
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                     <NavLink class="nav-link" href="herramientas/viento">
+                        <span class="bi bi-wind" aria-hidden="true"></span> Rosa Vientos
+                    </NavLink>
+                </li>
+                 <li class="nav-item">
+                     <NavLink class="nav-link" href="herramientas/rendimiento">
+                        <span class="bi bi-airplane-engines" aria-hidden="true"></span> Rendimiento
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                     <NavLink class="nav-link" href="herramientas/perfil">
+                        <span class="bi bi-bezier2" aria-hidden="true"></span> Perfil Alar
+                    </NavLink>
+                </li>
+                 <li class="nav-item">
+                     <NavLink class="nav-link" href="herramientas/trayectoria">
+                        <span class="bi bi-send" aria-hidden="true"></span> Trayectoria
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                     <NavLink class="nav-link" href="herramientas/motores">
+                        <span class="bi bi-gear-wide-connected" aria-hidden="true"></span> Motores
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="ayuda">
+                        <span class="bi bi-question-circle-fill" aria-hidden="true"></span> Ayuda
+                    </NavLink>
+                </li>
+            </ul>
+             <ul class="navbar-nav ms-auto">
+                 <li class="nav-item">
+                     <NavLink class="nav-link" href="perfil">
+                        <span class="bi bi-person-circle" aria-hidden="true"></span> Perfil
+                    </NavLink>
+                 </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

@@ -1,0 +1,59 @@
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<canvas id="@CanvasId"></canvas>
+
+@code {
+    [Parameter] public string CanvasId { get; set; } = "polarChart_" + Guid.NewGuid().ToString("N");
+    [Parameter] public ChartData Data { get; set; } = new();
+    [Parameter] public ChartOptions Options { get; set; } = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("chartHelpers.createPolarChart", CanvasId, new { data = Data, options = Options });
+        }
+    }
+    
+    public async Task UpdateAsync(ChartData newData)
+    {
+        Data = newData;
+        await JSRuntime.InvokeVoidAsync("chartHelpers.updateChart", CanvasId, Data);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("chartHelpers.destroyChart", CanvasId);
+    }
+
+    public class ChartData
+    {
+        public List<string> Labels { get; set; } = new();
+        public List<ChartDataset> Datasets { get; set; } = new();
+    }
+
+    public class ChartDataset
+    {
+        public string Label { get; set; } = "";
+        public List<double> Data { get; set; } = new();
+        public List<string> BackgroundColor { get; set; } = new();
+    }
+
+    public class ChartOptions
+    {
+        public bool Responsive { get; set; } = true;
+        public PluginsOptions Plugins { get; set; } = new();
+    }
+    
+     public class PluginsOptions
+    {
+        public LegendOptions Legend { get; set; } = new();
+    }
+    
+    public class LegendOptions
+    {
+        public bool Display { get; set; } = true;
+        public string Position { get; set; } = "right";
+    }
+}

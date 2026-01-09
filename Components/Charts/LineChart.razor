@@ -1,0 +1,81 @@
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<canvas id="@CanvasId"></canvas>
+
+@code {
+    [Parameter] public string CanvasId { get; set; } = "lineChart_" + Guid.NewGuid().ToString("N");
+    [Parameter] public ChartData Data { get; set; } = new();
+    [Parameter] public ChartOptions Options { get; set; } = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("chartHelpers.createLineChart", CanvasId, new { data = Data, options = Options });
+        }
+    }
+
+    public async Task UpdateAsync(ChartData newData)
+    {
+        Data = newData;
+        await JSRuntime.InvokeVoidAsync("chartHelpers.updateChart", CanvasId, Data);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("chartHelpers.destroyChart", CanvasId);
+    }
+
+    // Simple DTOs for Chart.js structure
+    public class ChartData
+    {
+        public List<string> Labels { get; set; } = new();
+        public List<ChartDataset> Datasets { get; set; } = new();
+    }
+
+    public class ChartDataset
+    {
+        public string Label { get; set; } = "";
+        public List<double> Data { get; set; } = new();
+        public string BorderColor { get; set; } = "rgb(75, 192, 192)";
+        public double Tension { get; set; } = 0.1;
+        public bool Fill { get; set; } = false;
+    }
+
+    public class ChartOptions
+    {
+        public bool Responsive { get; set; } = true;
+        public PluginsOptions Plugins { get; set; } = new();
+        public ScalesOptions Scales { get; set; } = new();
+    }
+    
+    public class PluginsOptions
+    {
+        public LegendOptions Legend { get; set; } = new();
+    }
+    
+    public class LegendOptions
+    {
+        public bool Display { get; set; } = true;
+        public string Position { get; set; } = "top";
+    }
+
+    public class ScalesOptions
+    {
+        public ScaleAxis X { get; set; } = new(); // 'x' axis in chart.js v3+
+        public ScaleAxis Y { get; set; } = new(); // 'y' axis
+    }
+
+    public class ScaleAxis 
+    {
+        public bool Display { get; set; } = true;
+        public TitleOptions Title { get; set; } = new();
+    }
+
+    public class TitleOptions
+    {
+        public bool Display { get; set; } = false;
+        public string Text { get; set; } = "";
+    }
+}

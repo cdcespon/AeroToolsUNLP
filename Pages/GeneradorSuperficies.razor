@@ -1,0 +1,99 @@
+@page "/herramientas/superficies"
+@using AeroToolsUNLP.Services.Calculators
+@using AeroToolsUNLP.Components.Common
+@inject GeometriaService GeometriaService
+@inject IJSRuntime JSRuntime
+
+<div class="container-fluid mt-3">
+    <div class="row">
+         <!-- Sidebar Controls -->
+        <div class="col-md-3">
+             <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">Generador de Obstáculos</div>
+                <div class="card-body scrollable-panel">
+                    <NumericInput Label="Latitud" @bind-Value="lat" Step="0.0001" Placeholder="-34.9" />
+                    <NumericInput Label="Longitud" @bind-Value="lon" Step="0.0001" Placeholder="-57.9" />
+                    
+                    <hr />
+                    
+                    <NumericInput Label="Radio / Ancho (m)" @bind-Value="width" Unit="m" Step="1" />
+                    <NumericInput Label="Altura (m)" @bind-Value="height" Unit="m" Step="1" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Color</label>
+                        <select class="form-select" @bind="color">
+                            <option value="red">Rojo</option>
+                            <option value="blue">Azul</option>
+                            <option value="green">Verde</option>
+                            <option value="orange">Naranja</option>
+                             <option value="rgba(255,0,0,0.5)">Rojo Transparente</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" @onclick="Generar">
+                            <i class="bi bi-box"></i> Generar 3D
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="Limpiar">
+                            <i class="bi bi-trash"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+                 <div class="card-footer">
+                    <button class="btn btn-warning w-100" @onclick="ExportarKML" disabled="@(!generated)">
+                        <i class="bi bi-file-earmark-code"></i> Exportar KML
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cesium Viewer -->
+        <div class="col-md-9">
+            <CesiumViewer @ref="cesiumViewer" ContainerId="mainCesiumView" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private CesiumViewer? cesiumViewer;
+    
+    // Default location: La Plata Airport approx
+    private double lat = -34.97;
+    private double lon = -57.89;
+    private double width = 500;
+    private double height = 100;
+    private string color = "rgba(255,0,0,0.5)";
+    private bool generated = false;
+
+    private async Task Generar()
+    {
+        if (cesiumViewer == null) return;
+        
+        await cesiumViewer.ClearEntitiesAsync();
+        
+        // Generate Cylinder entity for Obstacle
+        string entityJson = GeometriaService.GenerateRectangleEntity(lon, lat, width, height, height, color); // Reusing logic, treating height as extrusion
+        
+        await cesiumViewer.AddEntityAsync(entityJson);
+        // await cesiumViewer.FlyToAsync(lat, lon, height * 2 + 1000);
+        generated = true;
+    }
+
+    private async Task Limpiar()
+    {
+        if (cesiumViewer != null)
+        {
+            await cesiumViewer.ClearEntitiesAsync();
+            generated = false;
+        }
+    }
+
+    private async Task ExportarKML()
+    {
+        string kmlContent = GeometriaService.GenerateKml(lon, lat, width, height, "Obstaculo Generado");
+        var fileName = "obstaculo.kml";
+        
+        // Use JS interop to download file
+        await JSRuntime.InvokeVoidAsync("downloadFileFromText", fileName, kmlContent);
+    }
+}

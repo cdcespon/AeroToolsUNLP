@@ -1,0 +1,15 @@
+﻿@inherits LayoutComponentBase
+
+<div class="d-flex flex-column min-vh-100">
+    <header>
+        <NavMenu />
+    </header>
+
+    <main class="flex-grow-1">
+        <article class="content px-4 py-3">
+            @Body
+        </article>
+    </main>
+
+    <Footer />
+</div>

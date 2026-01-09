@@ -1,0 +1,192 @@
+@page "/herramientas/viento"
+@using AeroToolsUNLP.Services.Data
+@using AeroToolsUNLP.Components.Charts
+@using AeroToolsUNLP.Components.Common
+@using MathNet.Numerics.Statistics
+@inject ImportService ImportService
+
+<div class="container mt-4">
+    <h2><i class="bi bi-wind"></i> Rosa de los Vientos</h2>
+    <p class="text-muted">Análisis estadístico de dirección y velocidad del viento.</p>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">Importar Datos</div>
+                <div class="card-body">
+                    <InputFile OnChange="LoadFiles" class="form-control mb-3" accept=".csv" />
+                    <small class="text-muted">
+                        Formato esperado: CSV con columnas "Speed" (m/s) y "Direction" (grados).
+                    </small>
+                    
+                    @if (isLoading)
+                    {
+                        <div class="text-center mt-3">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p>Procesando...</p>
+                        </div>
+                    }
+
+                    @if (measurements.Any())
+                    {
+                        <hr />
+                        <h6>Estadísticas Básicas</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Muestras</span>
+                                <strong>@measurements.Count</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Vel. Media</span>
+                                <strong>@stats.MeanSpeed.ToString("F2") m/s</strong>
+                            </li>
+                             <li class="list-group-item d-flex justify-content-between">
+                                <span>Vel. Máxima</span>
+                                <strong>@stats.MaxSpeed.ToString("F2") m/s</strong>
+                            </li>
+                             <li class="list-group-item d-flex justify-content-between">
+                                <span>Dir. Predominante</span>
+                                <strong>@stats.PredominantDir</strong>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm p-3">
+                 @if (measurements.Any())
+                 {
+                    <div style="height: 500px; width: 100%;">
+                        <PolarChart @ref="polarChart" Options="chartOptions" />
+                    </div>
+                 }
+                 else
+                 {
+                     <div class="text-center py-5 text-muted">
+                         <i class="bi bi-cloud-upload display-4"></i>
+                         <p class="mt-2">Cargue un archivo CSV para visualizar la rosa de los vientos.</p>
+                     </div>
+                 }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<WindMeasurement> measurements = new();
+    private WindStats stats = new();
+    private bool isLoading = false;
+    private PolarChart? polarChart;
+    
+    // We treat PolarChart as a bucket histogram for directions (N, NE, E, SE, S, SW, W, NW) -> 8 bins usually
+    // Or 16 bins. Let's do 8 cardinal points for simplicity: N, NE, E, SE, S, SW, W, NW.
+    // Each bin value will be the *frequency* or *mean speed* in that direction?
+    // Usually Wind Rose shows frequency distribution. Let's show Frequency for now.
+    
+    private PolarChart.ChartOptions chartOptions = new() {
+        Responsive = true,
+        Plugins = new() { Legend = new() { Position = "right" } }
+    };
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        try
+        {
+            measurements = await ImportService.ParseWindData(e.File);
+            CalculateStats();
+            await UpdateChart();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reading file: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void CalculateStats()
+    {
+        if (!measurements.Any()) return;
+
+        var speeds = measurements.Select(m => m.Speed);
+        stats.MeanSpeed = speeds.Average();
+        stats.MaxSpeed = speeds.Max();
+        
+        // Predominant direction logic can be improved, simple mode here
+        // Binning into 8 sectors
+        var sectorCounts = new int[8];
+        foreach(var m in measurements)
+        {
+            int sector = GetSector(m.Direction);
+            sectorCounts[sector]++;
+        }
+        
+        int maxIdx = Array.IndexOf(sectorCounts, sectorCounts.Max());
+        stats.PredominantDir = GetSectorName(maxIdx);
+    }
+    
+    private int GetSector(double deg)
+    {
+        // 0=N, 1=NE, 2=E...
+        // N is centered at 0/360. So 337.5 to 22.5 is N.
+        double normalized = (deg + 22.5) % 360;
+        return (int)(normalized / 45);
+    }
+    
+    private string GetSectorName(int index)
+    {
+        string[] sectors = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
+        if (index >= 0 && index < 8) return sectors[index];
+        return "?";
+    }
+
+    private async Task UpdateChart()
+    {
+        if (polarChart == null) return;
+        
+        // Prepare data for Polar Chart (Frequency)
+        var sectorCounts = new int[8];
+        foreach (var m in measurements)
+        {
+            sectorCounts[GetSector(m.Direction)]++;
+        }
+
+        var data = new PolarChart.ChartData
+        {
+            Labels = new List<string> { "N", "NE", "E", "SE", "S", "SW", "W", "NW" },
+            Datasets = new List<PolarChart.ChartDataset>
+            {
+                new() 
+                { 
+                    Label = "Frecuencia", 
+                    Data = sectorCounts.Select(c => (double)c).ToList(),
+                    BackgroundColor = new List<string> 
+                    {
+                        "rgba(255, 99, 132, 0.5)",
+                        "rgba(54, 162, 235, 0.5)",
+                        "rgba(255, 206, 86, 0.5)",
+                        "rgba(75, 192, 192, 0.5)",
+                        "rgba(153, 102, 255, 0.5)",
+                        "rgba(255, 159, 64, 0.5)",
+                        "rgba(199, 199, 199, 0.5)",
+                         "rgba(83, 102, 255, 0.5)"
+                    }
+                }
+            }
+        };
+        
+        await polarChart.UpdateAsync(data);
+    }
+
+    public class WindStats
+    {
+        public double MeanSpeed { get; set; }
+        public double MaxSpeed { get; set; }
+        public string PredominantDir { get; set; } = "-";
+    }
+}

@@ -1,0 +1,176 @@
+@page "/herramientas/atmosfera"
+@using AeroToolsUNLP.Services.Calculators
+@using AeroToolsUNLP.Components.Charts
+@using AeroToolsUNLP.Components.Common
+@inject AtmosferaService AtmosferaService
+@inject IJSRuntime JS
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="text-primary"><i class="bi bi-cloud-haze2"></i> Analizador de Atmósfera Estándar</h2>
+            <p class="text-muted">Desviación ISA y propiedades de la atmósfera.</p>
+        </div>
+    </div>
+
+    <div class="row">
+         <!-- Inputs -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">Entradas</div>
+                <div class="card-body">
+                    <NumericInput Label="Altitud Geométrica (h)" 
+                                  @bind-Value="altitude" 
+                                  Unit="m" 
+                                  Step="100" 
+                                  Placeholder="0" />
+                    
+                    <NumericInput Label="Delta ISA (ΔT)" 
+                                  @bind-Value="deltaT" 
+                                  Unit="°C" 
+                                  Step="1" 
+                                  Placeholder="0"
+                                  HelpText="Desviación de temperatura respecto a ISA." />
+
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-primary" @onclick="CalcularSingle"> Calcular Punto</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single Result Card -->
+            @if (currentResult != null)
+            {
+                 <div class="card shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white">Resultados (h = @currentResult.Altitude m)</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Temperatura
+                            <span class="fw-bold">@currentResult.TemperatureC.ToString("F2") °C / @currentResult.TemperatureK.ToString("F2") K</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Presión
+                            <span class="fw-bold">@((currentResult.PressurePa / 100).ToString("F2")) hPa</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                             Densidad
+                            <span class="fw-bold">@currentResult.Density.ToString("F4") kg/m³</span>
+                        </li>
+                         <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Vel. Sonido (a)
+                            <span class="fw-bold">@currentResult.SpeedOfSound.ToString("F2") m/s</span>
+                        </li>
+                         <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Sigma (σ)
+                            <span class="fw-bold">@currentResult.RelativeDensity.ToString("F4")</span>
+                        </li>
+                    </ul>
+                </div>
+            }
+        </div>
+
+        <!-- Charts & Table -->
+        <div class="col-md-8">
+            <ul class="nav nav-tabs mb-3">
+                <li class="nav-item">
+                    <button class="nav-link @(activeTab == "charts" ? "active" : "")" @onclick="@(() => activeTab = "charts")">Gráficos</button>
+                </li>
+                <li class="nav-item">
+                     <button class="nav-link @(activeTab == "table" ? "active" : "")" @onclick="@(() => activeTab = "table")">Tabla de Rango</button>
+                </li>
+            </ul>
+
+            @if (activeTab == "charts")
+            {
+                 <div class="card shadow-sm p-3">
+                     <h5>Variación con la Altitud</h5>
+                     <div style="height: 400px;">
+                        <LineChart @ref="lineChart" Options="chartOptions" />
+                     </div>
+                 </div>
+            }
+            else
+            {
+                 <DataGrid Items="rangeResults" CssClass="table-sm">
+                     <HeaderContent>
+                        <th>Altitud (m)</th>
+                        <th>Temp (°C)</th>
+                        <th>Presión (hPa)</th>
+                        <th>Densidad (kg/m³)</th>
+                     </HeaderContent>
+                     <RowTemplate Context="item">
+                         <td>@item.Altitude</td>
+                         <td>@item.TemperatureC.ToString("F1")</td>
+                         <td>@((item.PressurePa / 100).ToString("F0"))</td>
+                         <td>@item.Density.ToString("F3")</td>
+                     </RowTemplate>
+                 </DataGrid>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private double altitude = 0;
+    private double deltaT = 0;
+    private AtmosphereResult? currentResult;
+    private List<AtmosphereResult> rangeResults = new();
+    private string activeTab = "charts";
+
+    private LineChart? lineChart;
+    private LineChart.ChartOptions chartOptions = new() {
+        Responsive = true,
+        Plugins = new() { Legend = new() { Position = "top" } },
+        Scales = new() { 
+            X = new() { Title = new() { Display = true, Text = "Altitud (m)" } },
+            Y = new() { Title = new() { Display = true, Text = "Ratio" } }
+        }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initial Calculation for range
+        CalculateRange();
+    }
+
+    private void CalcularSingle()
+    {
+        currentResult = AtmosferaService.Calculate(altitude, deltaT);
+        // Refresh range logic if needed, but usually independent
+    }
+
+    private async void CalculateRange()
+    {
+        rangeResults.Clear();
+        var labels = new List<string>();
+        var tempData = new List<double>();
+        var pressData = new List<double>();
+        var densData = new List<double>();
+
+        for (int h = 0; h <= 15000; h += 1000)
+        {
+            var res = AtmosferaService.Calculate(h, deltaT);
+            rangeResults.Add(res);
+            
+            labels.Add(h.ToString());
+            tempData.Add(res.TemperatureK / 288.15); // Normalize to show on same scale visually roughly
+            pressData.Add(res.RelativePressure);
+            densData.Add(res.RelativeDensity);
+        }
+
+        if (lineChart != null)
+        {
+            var data = new LineChart.ChartData
+            {
+                Labels = labels,
+                Datasets = new List<LineChart.ChartDataset>
+                {
+                    new() { Label = "Presión Relativa (δ)", Data = pressData, BorderColor = "rgb(255, 99, 132)" },
+                    new() { Label = "Densidad Relativa (σ)", Data = densData, BorderColor = "rgb(54, 162, 235)" },
+                    new() { Label = "Temp Relativa (T/T0)", Data = tempData, BorderColor = "rgb(75, 192, 192)" }
+                }
+            };
+            await lineChart.UpdateAsync(data);
+        }
+    }
+}

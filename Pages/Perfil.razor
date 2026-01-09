@@ -1,0 +1,82 @@
+@page "/perfil"
+@using AeroToolsUNLP.Models.Core
+@using AeroToolsUNLP.Services.Auth
+@using AeroToolsUNLP.Components.Auth
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<RequireAuth>
+    <Authorized>
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">Mi Perfil</h3>
+                            <span class="badge bg-light text-primary">@usuario?.Tipo.ToUpper()</span>
+                        </div>
+                        <div class="card-body">
+                            @if (usuario != null)
+                            {
+                                <div class="row mb-4">
+                                    <div class="col-md-2 text-center">
+                                        <div class="display-1 text-secondary"><i class="bi bi-person-circle"></i></div>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <h4>@usuario.Nombre</h4>
+                                        <p class="text-muted mb-1"><strong>Legajo:</strong> @usuario.Legajo</p>
+                                        <p class="text-muted mb-1"><strong>Carrera:</strong> @(usuario.Carrera ?? "No especificada")</p>
+                                        <p class="text-muted mb-1"><strong>Email:</strong> @(usuario.Email ?? "-")</p>
+                                        <p class="text-muted"><strong>Miembro desde:</strong> @usuario.PrimeraVisita.ToShortDateString()</p>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <div class="row text-center mb-4">
+                                    <div class="col-4">
+                                        <div class="card bg-light border-0">
+                                            <div class="card-body">
+                                                <h2 class="mb-0 text-primary">@usuario.TotalCalculos</h2>
+                                                <small class="text-muted">Cálculos Realizados</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Add more stats here later -->
+                                </div>
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button class="btn btn-outline-danger" @onclick="CerrarSesion">
+                                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <p>Cargando datos...</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Redirigiendo a login...</p>
+    </NotAuthorized>
+</RequireAuth>
+
+@code {
+    private Usuario? usuario;
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuario = await AuthService.ObtenerUsuarioActual();
+    }
+
+    private async Task CerrarSesion()
+    {
+        await AuthService.CerrarSesion();
+        Navigation.NavigateTo("/");
+    }
+}

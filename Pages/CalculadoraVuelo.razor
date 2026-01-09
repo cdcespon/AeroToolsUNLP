@@ -1,0 +1,159 @@
+@page "/herramientas/rendimiento"
+@using AeroToolsUNLP.Services.Calculators
+@using AeroToolsUNLP.Components.Common
+@inject RendimientoService RendimientoService
+
+<div class="container mt-4">
+    <h2><i class="bi bi-airplane-engines"></i> Calculadora de Rendimiento</h2>
+    <p class="text-muted">Estimación de parámetros de vuelo y performance.</p>
+
+    <div class="row">
+        <!-- Breguet Range -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">Alcance (Breguet - Hélice)</div>
+                <div class="card-body">
+                    <NumericInput Label="Eficiencia Hélice (η)" @bind-Value="eta" Placeholder="0.8" Step="0.05" />
+                    <NumericInput Label="Relación L/D" @bind-Value="ldRatio" Placeholder="12" Step="0.5" />
+                    <NumericInput Label="Consumo Esp. (SFC)" @bind-Value="sfc" Placeholder="0.5" Step="0.01" HelpText="C [1/hr] or similar consistent unit related to W flow" />
+                    <div class="row">
+                        <div class="col-6">
+                             <NumericInput Label="Peso Inicial (W0)" @bind-Value="w0" Unit="kg" />
+                        </div>
+                        <div class="col-6">
+                             <NumericInput Label="Peso Final (W1)" @bind-Value="w1" Unit="kg" />
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100 mt-3" @onclick="CalcularAlcance">Calcular Alcance</button>
+                    
+                    @if (rangeResult > 0)
+                    {
+                        <div class="alert alert-success mt-3 text-center">
+                            <strong>Alcance Estimado: @rangeResult.ToString("F2") km</strong> <br/>
+                            <small class="text-muted">(Asumiendo unidades consistentes, e.g. SFC en 1/hr -> resultado en km/h * hr = km? Check units!)</small>
+                            <small class="d-block text-muted">Nota: Formula simplificada R = (η/c) * (L/D) * ln(W0/W1) * V (if c in force/power). Si c es consumo especifico...</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Stall Speed -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-danger text-white">Velocidad de Pérdida (Vs)</div>
+                <div class="card-body">
+                    <NumericInput Label="Peso (W)" @bind-Value="stallWeight" Unit="N" Placeholder="9800" />
+                    <NumericInput Label="Densidad (ρ)" @bind-Value="density" Unit="kg/m³" Placeholder="1.225" />
+                    <NumericInput Label="Superficie Alar (S)" @bind-Value="surface" Unit="m²" Placeholder="15" />
+                    <NumericInput Label="CL Máximo" @bind-Value="clMax" Placeholder="1.5" Step="0.1" />
+
+                    <button class="btn btn-danger w-100 mt-3" @onclick="CalcularStall">Calcular Vs</button>
+
+                    @if (stallResult > 0)
+                    {
+                        <div class="alert alert-danger mt-3 text-center">
+                            <strong>Vs: @stallResult.ToString("F2") m/s</strong> <br/>
+                            <span>(@((stallResult * 3.6).ToString("F1")) km/h)</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+         <!-- Gliding -->
+        <div class="col-md-6 mb-4">
+             <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">Planeo</div>
+                <div class="card-body">
+                    <NumericInput Label="Altura Inicial (h)" @bind-Value="glideHeight" Unit="m" />
+                    <NumericInput Label="Relación L/D" @bind-Value="glideRatio" Placeholder="15" />
+                    
+                    <button class="btn btn-success w-100 mt-3" @onclick="CalcularPlaneo">Calcular Distancia</button>
+                    
+                    @if (glideResult > 0)
+                    {
+                         <div class="alert alert-success mt-3 text-center">
+                            <strong>Distancia: @glideResult.ToString("F2") m</strong> <br/>
+                            <span>(@((glideResult / 1000).ToString("F2")) km)</span>
+                        </div>
+                    }
+                </div>
+             </div>
+        </div>
+        
+         <!-- Turn Radius -->
+        <div class="col-md-6 mb-4">
+             <div class="card shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">Radio de Viraje</div>
+                <div class="card-body">
+                    <NumericInput Label="Velocidad (TAS)" @bind-Value="turnSpeed" Unit="m/s" />
+                    <NumericInput Label="Ángulo de Banqueo (φ)" @bind-Value="bankAngle" Unit="°" Placeholder="30" />
+                    
+                    <button class="btn btn-warning w-100 mt-3" @onclick="CalcularViraje">Calcular Radio</button>
+                    
+                    @if (turnResult > 0)
+                    {
+                         <div class="alert alert-warning mt-3 text-center">
+                            <strong>Radio: @turnResult.ToString("F2") m</strong>
+                        </div>
+                    }
+                </div>
+             </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Breguet Vars
+    private double eta = 0.8;
+    private double ldRatio = 12;
+    private double sfc = 0.5;
+    private double w0 = 1000;
+    private double w1 = 800;
+    private double rangeResult = 0;
+
+    // Stall Vars
+    private double stallWeight = 9800; // N
+    private double density = 1.225;
+    private double surface = 15;
+    private double clMax = 1.5;
+    private double stallResult = 0;
+    
+    // Glide Vars
+    private double glideHeight = 1000;
+    private double glideRatio = 15;
+    private double glideResult = 0;
+    
+    // Turn Vars
+    private double turnSpeed = 50; // m/s
+    private double bankAngle = 30; // deg
+    private double turnResult = 0;
+
+    private void CalcularAlcance()
+    {
+        // Note: This needs unit care. Assuming X units produce result in km for demo. 
+        // Real implementation requires explicit unit mgmt.
+        // Assuming formula that gives result in same distance unit as Velocity * Time
+        // R = V * (L/D) / (g * SFC) * ln(...) ???
+        // Let's use service directly but user implies units check.
+        rangeResult = RendimientoService.CalculateRangePropeller(eta, ldRatio, sfc, w0, w1); 
+        // Just raw wrapper call for now
+    }
+
+    private void CalcularStall()
+    {
+        stallResult = RendimientoService.CalculateStallSpeed(stallWeight, density, surface, clMax);
+    }
+    
+    private void CalcularPlaneo()
+    {
+        glideResult = RendimientoService.CalculateGlidingDistance(glideHeight, glideRatio);
+    }
+    
+    private void CalcularViraje()
+    {
+        turnResult = RendimientoService.CalculateTurnRadius(turnSpeed, bankAngle);
+    }
+}

@@ -1,0 +1,149 @@
+@page "/herramientas/motores"
+@using AeroToolsUNLP.Services.Calculators
+@using AeroToolsUNLP.Components.Common
+@using AeroToolsUNLP.Components.Charts
+@inject MotoresService MotoresService
+
+<div class="container mt-4">
+    <h2><i class="bi bi-gear-wide-connected"></i> Rendimiento de Motores</h2>
+    <p class="text-muted">Análisis de ciclos termodinámicos y propulsión.</p>
+
+    <div class="row">
+        <!-- Turbojet Thrust -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-danger text-white">Empuje Turbojet (Ideal)</div>
+                <div class="card-body">
+                    <NumericInput Label="Flujo Másico (m/s)" @bind-Value="massFlow" Placeholder="50" />
+                    <NumericInput Label="Vel. Salida (V_exit)" @bind-Value="vExit" Unit="m/s" Placeholder="600" />
+                    <NumericInput Label="Vel. Entrada (V_inlet)" @bind-Value="vInlet" Unit="m/s" Placeholder="200" />
+                    <div class="row">
+                         <div class="col-6">
+                            <NumericInput Label="P Salida" @bind-Value="pExit" Unit="Pa" Placeholder="101325" />
+                        </div>
+                        <div class="col-6">
+                            <NumericInput Label="P Ambiente" @bind-Value="pAmbient" Unit="Pa" Placeholder="101325" />
+                        </div>
+                    </div>
+                     <NumericInput Label="Area Salida (A_exit)" @bind-Value="aExit" Unit="m²" Placeholder="0.2" />
+                    
+                    <button class="btn btn-danger w-100 mt-3" @onclick="CalcularEmpuje">Calcular Empuje</button>
+                    
+                    @if (thrustResult > 0)
+                    {
+                        <div class="alert alert-danger mt-3 text-center">
+                            <strong>Empuje: @thrustResult.ToString("F2") N</strong> <br/>
+                            <small>(@((thrustResult/9.81).ToString("F0")) kgf)</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Propulsive Efficiency -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-info text-white">Eficiencia Propulsiva</div>
+                <div class="card-body">
+                    <NumericInput Label="Vel. Vuelo (V0)" @bind-Value="effVFlight" Unit="m/s" Placeholder="250" />
+                    <NumericInput Label="Vel. Chorro (Ve)" @bind-Value="effVExit" Unit="m/s" Placeholder="500" />
+
+                    <button class="btn btn-info w-100 mt-3" @onclick="CalcularEficiencia">Calcular η_p</button>
+
+                    @if (effResult > 0)
+                    {
+                        <div class="alert alert-info mt-3 text-center">
+                            <strong>Eficiencia Propulsiva: @((effResult * 100).ToString("F1")) %</strong>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+         <!-- Brayton Cycle -->
+        <div class="col-md-6 mb-4">
+             <div class="card shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">Eficiencia Ciclo Brayton</div>
+                <div class="card-body">
+                    <NumericInput Label="Relación de Compresión (π)" @bind-Value="pressureRatio" Placeholder="20" Step="1" />
+                    <NumericInput Label="Gamma (γ)" @bind-Value="gamma" Placeholder="1.4" Step="0.01" />
+                    
+                    <button class="btn btn-warning w-100 mt-3" @onclick="CalcularBrayton">Calcular Eficiencia Térmica</button>
+                    
+                    @if (braytonResult > 0)
+                    {
+                         <div class="alert alert-warning mt-3 text-center">
+                            <strong>Eficiencia Térmica: @((braytonResult * 100).ToString("F1")) %</strong>
+                        </div>
+                    }
+                </div>
+             </div>
+        </div>
+        
+         <!-- TSFC -->
+        <div class="col-md-6 mb-4">
+             <div class="card shadow-sm h-100">
+                <div class="card-header bg-secondary text-white">Consumo Específico (TSFC)</div>
+                <div class="card-body">
+                    <NumericInput Label="Flujo Combustible" @bind-Value="fuelFlow" Unit="kg/s" Placeholder="1.5" Step="0.1" />
+                    <NumericInput Label="Empuje (T)" @bind-Value="tsfcThrust" Unit="N" Placeholder="50000" Step="1000" />
+                    
+                    <button class="btn btn-secondary w-100 mt-3" @onclick="CalcularTSFC">Calcular TSFC</button>
+                    
+                    @if (tsfcResult > 0)
+                    {
+                         <div class="alert alert-secondary mt-3 text-center">
+                            <strong>TSFC: @tsfcResult.ToString("E2") kg/(N·s)</strong>
+                        </div>
+                    }
+                </div>
+             </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Thrust
+    private double massFlow = 50;
+    private double vExit = 600;
+    private double vInlet = 200;
+    private double pExit = 101325;
+    private double pAmbient = 101325;
+    private double aExit = 0.2;
+    private double thrustResult = 0;
+    
+    // Efficiency
+    private double effVFlight = 250;
+    private double effVExit = 500;
+    private double effResult = 0;
+    
+    // Brayton
+    private double pressureRatio = 20;
+    private double gamma = 1.4;
+    private double braytonResult = 0;
+    
+    // TSFC
+    private double fuelFlow = 1.5;
+    private double tsfcThrust = 50000;
+    private double tsfcResult = 0;
+
+    private void CalcularEmpuje()
+    {
+        thrustResult = MotoresService.CalculateTurbojetThrust(massFlow, vExit, vInlet, pExit, pAmbient, aExit);
+    }
+
+    private void CalcularEficiencia()
+    {
+        effResult = MotoresService.CalculatePropulsiveEfficiency(effVFlight, effVExit);
+    }
+
+    private void CalcularBrayton()
+    {
+        braytonResult = MotoresService.CalculateBraytonEfficiency(pressureRatio, gamma);
+    }
+
+    private void CalcularTSFC()
+    {
+        tsfcResult = MotoresService.CalculateTSFC(fuelFlow, tsfcThrust);
+    }
+}
